@@ -36,15 +36,8 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"", 
-		"", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
-		"Мой раздел", 
-		"/moy-razdel/", 
+		"Карты", 
+		"/cards/", 
 		Array(), 
 		Array(), 
 		"" 
