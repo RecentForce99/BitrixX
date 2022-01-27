@@ -15,7 +15,7 @@ use \Bitrix\Main\UI\Filter\Options;
 
 /**
  * Class CardsListComponent
- * @package YLab\Components
+ * @package RF\Components
  * Компонент отображения списка элементов нашего ИБ
  */
 class CardsListComponent extends CBitrixComponent
