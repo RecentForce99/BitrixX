@@ -8,10 +8,10 @@ use Bitrix\Main\Localization\Loc;
 <div class="list">
     <?php foreach ($arResult['ITEMS'] as $arItem) { ?>
         <div>
-            <p><?= Loc::getMessage('YLAB.CARD.LIST.NUMBER') ?> <?= $arItem['CARD_NUMBER'] ?></p>
-            <p><?= Loc::getMessage('YLAB.CARD.LIST.USER') ?> <?= $arItem['CARD_USER'] ?></p>
-            <p><?= Loc::getMessage('YLAB.CARD.LIST.TYPE') ?> <?= $arItem['CARD_TYPE'] ?></p>
-            <p><?= Loc::getMessage('YLAB.CARD.LIST.SECRET') ?> <?= $arItem['CARD_SECRET'] ?></p>
+            <p><?= Loc::getMessage('RF.CARD.LIST.NUMBER') ?> <?= $arItem['CARD_NUMBER'] ?></p>
+            <p><?= Loc::getMessage('RF.CARD.LIST.USER') ?> <?= $arItem['CARD_USER'] ?></p>
+            <p><?= Loc::getMessage('RF.CARD.LIST.TYPE') ?> <?= $arItem['CARD_TYPE'] ?></p>
+            <p><?= Loc::getMessage('RF.CARD.LIST.SECRET') ?> <?= $arItem['CARD_SECRET'] ?></p>
         </div>
         <hr>
     <?php } ?>
