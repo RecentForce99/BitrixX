@@ -1,0 +1,10 @@
+<?php
+$MESS['RF.CARD.LIST.CLASS.ID'] = 'ID';
+$MESS['RF.CARD.LIST.CLASS.NAME'] = 'Имя';
+$MESS['RF.CARD.LIST.CLASS.EMAIL'] = 'Почта';
+$MESS['RF.CARD.LIST.CLASS.COUNTRY'] = 'Страна';
+$MESS['RF.CARD.LIST.CLASS.ADDRESS'] = 'Адрес';
+$MESS['RF.CARD.LIST.CLASS.PHONE_NUMBER'] = 'Номер телефона';
+$MESS['RF.CARD.LIST.CLASS.EDIT'] = 'Редактировать';
+$MESS['RF.CARD.LIST.CLASS.DELETE'] = 'Удалить';
+

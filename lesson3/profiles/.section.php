@@ -1,0 +1,6 @@
+<?
+$sSectionName = "Профили";
+$arDirProperties = Array(
+
+);
+?>
