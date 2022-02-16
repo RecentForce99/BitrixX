@@ -7,3 +7,5 @@ $MESS['RF.CARD.LIST.SUM'] = 'Суммарная стоимость';
 $MESS['RF.CARD.LIST.TIME'] = 'Срок действия:';
 $MESS['RF.CARD.LIST.END'] = 'Дата окончания действия карты:';
 $MESS['RF.CARD.LIST.SECRET'] = 'Секретный ключ:';
+$MESS['RF.CARD.LIST.EDIT'] = 'Редактировать';
+$MESS['RF.CARD.LIST.DELETE'] = 'Удалить';

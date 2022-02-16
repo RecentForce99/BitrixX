@@ -15,7 +15,7 @@ use \Bitrix\Main\UI\Filter\Options;
 
 /**
  * Class CardsListComponent
- * @package RF\Components
+ * @package YLab\Components
  * Компонент отображения списка элементов нашего ИБ
  */
 class CardsListComponent extends CBitrixComponent
@@ -37,7 +37,6 @@ class CardsListComponent extends CBitrixComponent
 
         $this->templateName = $this->GetTemplateName();
 
-
         return $arParams;
     }
 
@@ -49,7 +48,6 @@ class CardsListComponent extends CBitrixComponent
      */
     public function executeComponent()
     {
-
         $this->idIBlock = self::getIBlockIdByCode('credit_card');
 
         if ($this->templateName == 'grid') {
@@ -70,16 +68,22 @@ class CardsListComponent extends CBitrixComponent
     {
         $result = [];
 
-        $arFilter = [
-            'ACTIVE' => 'Y',
-            'IBLOCK_ID' => $this->idIBlock,
-        ];
+        if (!$this->getGridNav()->allRecordsShown()) {
+            $arNav['iNumPage'] = $this->getGridNav()->getCurrentPage();
+            $arNav['nPageSize'] = $this->getGridNav()->getPageSize();
+        } else {
+            $arNav = false;
+        }
+
+        $arFilter = $this->getGridFilterValues();
+
+        $arCurSort = $this->getObGridParams()->getSorting(['sort' => ['ID' => 'DESC']])['sort'];
 
         $elements = CIBlockElement::GetList(
-            [],
+            $arCurSort,
             $arFilter,
             false,
-            false,
+            $arNav,
             [
                 'ID',
                 'IBLOCK_ID',
@@ -96,12 +100,16 @@ class CardsListComponent extends CBitrixComponent
 
         while ($element = $elements->GetNext()) {
             $cardSecret = md5($element['PROPERTY_CARD_NUMBER_VALUE']);
+
+            $cardCost = (int)$element['PROPERTY_CARD_COST_VALUE'] * (int)$element['PROPERTY_CARD_PERIOD_VALUE'];
+
             $result[] = [
                 'ID' => $element['ID'],
                 'CARD_NUMBER' => $element['PROPERTY_CARD_NUMBER_VALUE'],
                 'CARD_USER' => $element['PROPERTY_CARD_USER_VALUE'],
                 'CARD_TYPE' => $element['PROPERTY_CARD_TYPE_VALUE'],
                 'CARD_PRICE' => $element['PROPERTY_CARD_PRICE_VALUE'],
+                'CARD_SUM' => $element['PROPERTY_CARD_PRICE_SUM'],
                 'VALIDITY_TIME' => $element['PROPERTY_VALIDITY_TIME_VALUE'],
                 'END_DATE' => $element['PROPERTY_END_DATE_VALUE'],
                 'CARD_SECRET' => $cardSecret,
@@ -122,8 +130,9 @@ class CardsListComponent extends CBitrixComponent
         $this->arResult['GRID_HEAD'] = $this->getGridHead();
 
         $this->arResult['GRID_NAV'] = $this->getGridNav();
+        $this->arResult['GRID_FILTER'] = $this->getGridFilterParams();
 
-        $this->arResult['BUTTONS']['ADD']['NAME'] = Loc::getMessage('RF.CARD.LIST.CLASS.ADD');
+        $this->arResult['BUTTONS']['ADD']['NAME'] = Loc::getMessage('YLAB.CARD.LIST.CLASS.ADD');
     }
 
     /**
@@ -131,7 +140,6 @@ class CardsListComponent extends CBitrixComponent
      *
      * @return array
      */
-
     private function getGridBody(): array
     {
         $arBody = [];
@@ -139,38 +147,35 @@ class CardsListComponent extends CBitrixComponent
         $arItems = $this->getElements();
 
         foreach ($arItems as $arItem) {
+            $arGridElement = [];
 
-            $arGridElement = [
-                'data' => [
-                    'ID' => $arItem['ID'],
-                    'CARD_NUMBER' => $arItem['CARD_NUMBER'],
-                    'CARD_USER' => $arItem['CARD_USER'],
-                    'CARD_TYPE' => $arItem['CARD_TYPE'],
-                    'CARD_PRICE' => $arItem['CARD_PRICE'],
-                    'CARD_PRICE_SUM' => $arItem['CARD_PRICE'] * $arItem['VALIDITY_TIME'],
-                    'VALIDITY_TIME' => $arItem['VALIDITY_TIME'],
-                    'END_DATE' => $arItem['END_DATE'],
-                    'CARD_SECRET' => $arItem['CARD_SECRET'],
+            $arGridElement['data'] = [
+                'ID' => $arItem['ID'],
+                'CARD_NUMBER' => $arItem['CARD_NUMBER'],
+                'CARD_USER' => $arItem['CARD_USER'],
+                'CARD_TYPE' => $arItem['CARD_TYPE'],
+                'CARD_PRICE' => $arItem['CARD_PRICE'],
+                'CARD_PRICE_SUM' => $arItem['CARD_PRICE'] * $arItem['VALIDITY_TIME'],
+                'VALIDITY_TIME' => $arItem['VALIDITY_TIME'],
+                'END_DATE' => $arItem['END_DATE'],
+                'CARD_SECRET' => $arItem['CARD_SECRET'],
+            ];
+
+            $arGridElement['actions'] = [
+                [
+                    'text' => Loc::getMessage('RF.CARD.LIST.CLASS.DELETE'),
+                    'onclick' => 'document.location.href="/"'
                 ],
-                'actions' => [
-                    [
-                        'text'    => 'Редактировать',
-                        'onclick' => 'document.location.href="/edit/"'
-                    ],
-                    [
-                        'text'    => 'Удалить',
-                        'onclick' => 'document.location.href="/delete/"'
-                    ]
-
-                ],
-
-
+                [
+                    'text' => Loc::getMessage('RF.CARD.LIST.CLASS.EDIT'),
+                    'onclick' => 'document.location.href="/"'
+                ]
             ];
 
             $arBody[] = $arGridElement;
         }
-        return $arBody;
 
+        return $arBody;
     }
 
     /**
@@ -190,14 +195,12 @@ class CardsListComponent extends CBitrixComponent
      */
     private function getGridHead(): array
     {
-         $arr = [
+        return [
             [
                 'id' => 'ID',
                 'name' => 'ID',
                 'default' => true,
                 'sort' => 'ID',
-                'type' => 'number',
-
             ],
             [
                 'id' => 'CARD_NUMBER',
@@ -223,22 +226,22 @@ class CardsListComponent extends CBitrixComponent
                 'type' => 'list', 'items' => ['Любой', 'Личная', 'Корпоративная']
 
             ],
-             [
-                 'id' => 'CARD_PRICE',
-                 'name' => Loc::getMessage('RF.CARD.LIST.CLASS.PRICE'),
-                 'default' => true,
-                 'sort' => 'PROPERTY_CARD_PRICE',
-                 'type' => 'number',
+            [
+                'id' => 'CARD_PRICE',
+                'name' => Loc::getMessage('RF.CARD.LIST.CLASS.PRICE'),
+                'default' => true,
+                'sort' => 'PROPERTY_CARD_PRICE',
+                'type' => 'number',
 
-             ],
-             [
-                 'id' => 'CARD_PRICE_SUM',
-                 'name' => Loc::getMessage('RF.CARD.LIST.CLASS.SUM'),
-                 'default' => true,
-                 'sort' => 'PROPERTY_CARD_PRICE_SUM',
-                 'type' => 'number',
+            ],
+            [
+                'id' => 'CARD_PRICE_SUM',
+                'name' => Loc::getMessage('RF.CARD.LIST.CLASS.SUM'),
+                'default' => true,
+                'sort' => 'PROPERTY_CARD_PRICE_SUM',
+                'type' => 'number',
 
-             ],
+            ],
             [
                 'id' => 'VALIDITY_TIME',
                 'name' => Loc::getMessage('RF.CARD.LIST.CLASS.TIME'),
@@ -260,10 +263,7 @@ class CardsListComponent extends CBitrixComponent
                 'name' => Loc::getMessage('RF.CARD.LIST.CLASS.SECRET'),
                 'default' => true,
             ],
-
         ];
-
-        return $arr;
     }
 
     /**
@@ -276,22 +276,45 @@ class CardsListComponent extends CBitrixComponent
      */
     public static function getIBlockIdByCode($code)
     {
-
         $IB = IblockTable::getList([
             'select' => ['ID'],
             'filter' => ['CODE' => $code],
             'limit' => '1',
             'cache' => ['ttl' => 3600],
         ]);
-
-
         $return = $IB->fetch();
         if (!$return) {
             throw new Exception('IBlock with code"' . $code . '" not found');
         }
+
         return $return['ID'];
     }
 
+    /**
+     * Возвращает настройки отображения грид фильтра.
+     *
+     * @return array
+     */
+    private function getGridFilterParams(): array
+    {
+        return [
+            [
+                'id' => 'ID',
+                'name' => 'ID',
+                'type' => 'number'
+            ],
+            [
+                'id' => 'PROPERTY_CARD_PRICE_VALUE',
+                'name' => Loc::getMessage('RF.CARD.LIST.CLASS.PRICE'),
+                'type' => 'number'
+            ],
+            [
+                'id' => 'CARD_END_DATE_VALUE',
+                'name' => Loc::getMessage('RF.CARD.LIST.CLASS.END'),
+                'type' => 'date'
+            ],
+        ];
+    }
 
     /**
      * Возвращает единственный экземпляр настроек грида.
@@ -330,6 +353,7 @@ class CardsListComponent extends CBitrixComponent
         $arFilterData = $obFilterOption->getFilter([]);
         $baseFilter = array_intersect_key($arFilterData, array_flip($obFilterOption->getUsedFields()));
         $formatedFilter = $this->prepareFilter($arFilterData, $baseFilter);
+
         return array_merge(
             $baseFilter,
             $formatedFilter
@@ -356,15 +380,23 @@ class CardsListComponent extends CBitrixComponent
             $arFilter['<=ID'] = (int)$arFilterData['ID_to'];
         }
 
-        if (!empty($arFilterData['PROPERTY_PRICE_VALUE_from'])) {
-            $arFilter['>=PROPERTY_PRICE_VALUE'] = (int)$arFilterData['PROPERTY_PRICE_VALUE_from'];
+        if (!empty($arFilterData['PROPERTY_CARD_PRICE_VALUE_from'])) {
+            $arFilter['>=PROPERTY_CARD_PRICE'] = (int)$arFilterData['PROPERTY_CARD_PRICE_VALUE_from'];
         }
-        if (!empty($arFilterData['PROPERTY_PRICE_VALUE_to'])) {
-            $arFilter['<=PROPERTY_PRICE_VALUE'] = (int)$arFilterData['PROPERTY_PRICE_VALUE_to'];
+        if (!empty($arFilterData['PROPERTY_CARD_PRICE_VALUE_to'])) {
+            $arFilter['<=PROPERTY_CARD_PRICE'] = (int)$arFilterData['PROPERTY_CARD_PRICE_VALUE_to'];
         }
 
-
-
+        if (!empty($arFilterData['CARD_END_DATE_VALUE_from'])) {
+            $arFilter['>=CARD_END_DATE'] = date(
+                "Y-m-d H:i:s",
+                strtotime($arFilterData['CARD_END_DATE_VALUE_from']));
+        }
+        if (!empty($arFilterData['CARD_END_DATE_VALUE_to'])) {
+            $arFilter['<=CARD_END_DATE'] = date(
+                "Y-m-d H:i:s",
+                strtotime($arFilterData['CARD_END_DATE_VALUE_to']));
+        }
         return $arFilter;
     }
 

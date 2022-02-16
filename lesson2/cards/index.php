@@ -1,18 +1,8 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("Карты");
-?>
-
-<?php
-
-    $APPLICATION->IncludeComponent(
+?><?$APPLICATION->IncludeComponent(
 	"recentforce:cards.list",
-	"grid", 
-	array(
-		"COMPONENT_TEMPLATE" => "grid"
-	),
-	false
-);
-?>
-
-<?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+	"grid",
+Array()
+);?><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

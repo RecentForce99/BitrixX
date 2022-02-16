@@ -8,3 +8,5 @@ $MESS['RF.CARD.LIST.CLASS.TIME'] = 'Срок действия';
 $MESS['RF.CARD.LIST.CLASS.END'] = 'Дата окончания действия карты';
 $MESS['RF.CARD.LIST.CLASS.SECRET'] = 'Секретный ключ';
 $MESS['RF.CARD.LIST.CLASS.ADD'] = 'Добавить';
+$MESS['RF.CARD.LIST.CLASS.EDIT'] = 'Редактировать';
+$MESS['RF.CARD.LIST.CLASS.DELETE'] = 'Удалить';
