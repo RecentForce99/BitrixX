@@ -404,10 +404,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         item.classList.add(`active`);
         slides[i].classList.add(`active`);
-
-
+        
+        
       })
-    })
+    })    
   }
   personalDataSlider();
 
@@ -446,5 +446,61 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   commonEdit();
+
+
+
+  const html = document.querySelector(`html`);
+  const popup_close = document.querySelectorAll(`.popup__close`);
+  const popups = document.querySelectorAll(`.popup`);
+  const open_review_gallery = document.querySelectorAll(`.open_review_gallery`);
+  const popup_review_gallery = document.querySelector(`.popup_review_gallery`);
+
+  const popupClose = (links) => {
+    links.forEach(link => {
+      link.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        popups.forEach((popup) => {
+          popup.classList.remove(`active`);
+        })
+        html.classList.remove(`ofh`);
+      })
+    })
+  }
+  popupClose(popup_close);
+
+  const linkClick = (links) => {
+    links.forEach(link => {
+      link.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        popup_review_gallery.classList.add(`active`);
+        html.classList.add(`ofh`);
+      })
+    })
+  }
+  linkClick(open_review_gallery);
+
+
+
+  const review_gallery_min = new Swiper('.review_gallery_min', {
+    watchSlidesProgress: true,
+    slidesPerView: 3,
+    breakpoints: {
+      768: {
+        direction: "vertical",
+        slidesPerView: 5,
+      }
+    },
+  });
+
+  const review_gallery = new Swiper('.review_gallery', {
+    navigation: {
+      prevEl: '.pagination__prew',
+      nextEl: '.pagination__next',
+    },
+    thumbs: {
+      swiper: review_gallery_min,
+    },
+
+  });
 
 });
